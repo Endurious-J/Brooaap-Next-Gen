@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Endurious Roadbook Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --sand:        #EFE7DB;
+  --orange:      #D96A27;
+  --anthracite:  #1A1A1A;
+  --body-grey:   #333333;
+  --off-white:   #FAF9F7;
+  --beige:       #DCD8D2;
+  --dark-bg:     #2A2A2A;
+  --copper:      #A88C6E;
+  --orange-dark: #B8561E;
+  --orange-light:#F0813A;
+  --border:      #D0C8BE;
+}
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--sand);
+  color: var(--body-grey);
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+.app-header {
+  background: var(--dark-bg);
+  padding: 0 20px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  border-bottom: 3px solid var(--orange);
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-icon {
+  width: 32px;
+  height: 32px;
+}
+
+.logo-text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--off-white);
+  letter-spacing: 0.5px;
+}
+
+.logo-text span {
+  color: var(--orange);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
+.btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--orange);
+  color: white;
+}
+.btn-primary:hover { background: var(--orange-dark); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--off-white);
+  border: 1.5px solid var(--copper);
+}
+.btn-secondary:hover { background: rgba(168,140,110,0.15); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--body-grey);
+  border: 1.5px solid var(--border);
+}
+.btn-ghost:hover { background: var(--beige); }
+
+.btn-danger {
+  background: transparent;
+  color: #c0392b;
+  border: 1.5px solid #c0392b;
+}
+.btn-danger:hover { background: #c0392b; color: white; }
+
+.btn-sm {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════
+   UPLOAD SCREEN
+═══════════════════════════════════════════════ */
+#upload-screen {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sand);
+}
+
+.upload-card {
+  background: var(--off-white);
+  border: 2px dashed var(--beige);
+  border-radius: 8px;
+  padding: 60px 80px;
+  text-align: center;
+  max-width: 520px;
+  width: 90%;
+  transition: border-color 0.2s;
+}
+
+.upload-card.drag-over {
+  border-color: var(--orange);
+  background: #fdf6f0;
+}
+
+.upload-icon {
+  margin-bottom: 20px;
+}
+
+.upload-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--anthracite);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.upload-subtitle {
+  color: var(--copper);
+  font-size: 14px;
+  margin-bottom: 32px;
+  font-weight: 500;
+}
+
+.upload-btn-wrap {
+  margin-bottom: 16px;
+}
+
+.upload-note {
+  font-size: 12px;
+  color: var(--copper);
+  margin-top: 16px;
+}
+
+#gpx-file-input { display: none; }
+
+/* ═══════════════════════════════════════════════
+   MAIN WORKSPACE
+═══════════════════════════════════════════════ */
+#workspace {
+  display: none;
+  flex: 1;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.workspace-toolbar {
+  background: var(--off-white);
+  border-bottom: 1px solid var(--beige);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--beige);
+  margin: 0 4px;
+}
+
+.route-info-badge {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  color: var(--copper);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-left: auto;
+}
+
+.workspace-panels {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   MAP PANEL
+═══════════════════════════════════════════════ */
+.map-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--beige);
+  min-width: 0;
+}
+
+.panel-header {
+  background: var(--sand);
+  border-bottom: 1px solid var(--beige);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--anthracite);
+}
+
+.panel-hint {
+  font-size: 11px;
+  color: var(--copper);
+  margin-left: auto;
+}
+
+#map {
+  flex: 1;
+}
+
+/* ═══════════════════════════════════════════════
+   ROADBOOK PANEL
+═══════════════════════════════════════════════ */
+.roadbook-panel {
+  width: 480px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--off-white);
+  overflow: hidden;
+}
+
+.roadbook-header {
+  background: var(--sand);
+  border-bottom: 1px solid var(--beige);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.roadbook-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   ROADBOOK ENTRIES
+═══════════════════════════════════════════════ */
+.rb-entry {
+  display: grid;
+  grid-template-columns: 64px 100px 1fr 80px;
+  border-bottom: 1px solid var(--beige);
+  min-height: 80px;
+  position: relative;
+  transition: background 0.1s;
+  background: var(--off-white);
+}
+
+.rb-entry:hover { background: #f5f2ef; }
+
+.rb-entry.selected { background: #fdf3ec; border-left: 3px solid var(--orange); }
+
+.rb-entry.add-row {
+  grid-template-columns: 1fr;
+  min-height: 36px;
+  background: var(--sand);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--beige);
+  color: var(--copper);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  gap: 6px;
+  transition: background 0.15s;
+}
+.rb-entry.add-row:hover { background: #ece4da; color: var(--orange); }
+
+.rb-cell {
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--beige);
+}
+.rb-cell:last-child { border-right: none; }
+
+/* Distance column */
+.rb-dist {
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dist-total {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--anthracite);
+}
+
+.dist-partial {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 10px;
+  color: var(--copper);
+}
+
+/* Tulip column */
+.rb-tulip {
+  padding: 6px;
+}
+
+.tulip-svg-wrap {
+  width: 88px;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s;
+}
+.tulip-svg-wrap:hover { border-color: var(--orange); }
+
+.tulip-svg-wrap svg {
+  width: 72px;
+  height: 56px;
+}
+
+/* Description column */
+.rb-desc {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rb-instruction {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--anthracite);
+  line-height: 1.3;
+}
+
+.rb-note {
+  font-size: 11px;
+  color: var(--copper);
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.rb-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.rb-input {
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1.5px solid var(--beige);
+  border-radius: 3px;
+  background: white;
+  color: var(--anthracite);
+  width: 100%;
+  outline: none;
+}
+.rb-input:focus { border-color: var(--orange); }
+
+/* Actions column */
+.rb-actions {
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+}
+
+/* ═══════════════════════════════════════════════
+   ROADBOOK TABLE HEADER
+═══════════════════════════════════════════════ */
+.rb-table-header {
+  display: grid;
+  grid-template-columns: 64px 100px 1fr 80px;
+  background: var(--dark-bg);
+  border-bottom: 2px solid var(--orange);
+  padding: 6px 0;
+  flex-shrink: 0;
+}
+
+.rb-th {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--copper);
+  text-align: center;
+  padding: 0 8px;
+  border-right: 1px solid #3a3a3a;
+}
+.rb-th:last-child { border-right: none; }
+
+/* ═══════════════════════════════════════════════
+   TULIP PICKER MODAL
+═══════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(26,26,26,0.7);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--off-white);
+  border-radius: 6px;
+  width: 560px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+
+.modal-header {
+  background: var(--dark-bg);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--orange);
+}
+
+.modal-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--off-white);
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--copper);
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close:hover { color: var(--off-white); }
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.tulip-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tulip-option {
+  aspect-ratio: 1;
+  border: 2px solid var(--beige);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px;
+  background: white;
+  transition: all 0.15s;
+}
+.tulip-option:hover { border-color: var(--orange); background: #fdf3ec; }
+.tulip-option.active { border-color: var(--orange); background: #fdf3ec; box-shadow: 0 0 0 2px var(--orange-light); }
+
+.tulip-option svg { width: 44px; height: 36px; }
+
+.tulip-label {
+  font-size: 9px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--copper);
+  text-align: center;
+}
+
+.modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid var(--beige);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════
+   DENSITY CONTROL
+═══════════════════════════════════════════════ */
+.density-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--body-grey);
+}
+
+.density-control label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--copper);
+}
+
+.density-control input[type="range"] {
+  width: 90px;
+  accent-color: var(--orange);
+}
+
+.density-value {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 11px;
+  color: var(--anthracite);
+  min-width: 36px;
+}
+
+/* ═══════════════════════════════════════════════
+   LEAFLET CUSTOM
+═══════════════════════════════════════════════ */
+.rb-marker {
+  background: var(--orange);
+  border: 2px solid white;
+  border-radius: 50%;
+  width: 12px !important;
+  height: 12px !important;
+  margin-left: -6px !important;
+  margin-top: -6px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.start-marker {
+  background: #27ae60;
+}
+
+.end-marker {
+  background: #c0392b;
+}
+
+/* ═══════════════════════════════════════════════
+   PRINT STYLES
+═══════════════════════════════════════════════ */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm 10mm;
+  }
+
+  body {
+    background: white;
+    overflow: visible;
+    height: auto;
+  }
+
+  .app-header, .workspace-toolbar, .map-panel, .panel-header, .rb-actions,
+  .modal-overlay, #upload-screen, .btn { display: none !important; }
+
+  #workspace {
+    display: flex !important;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  .workspace-panels {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .roadbook-panel {
+    width: 100% !important;
+    overflow: visible;
+  }
+
+  .roadbook-scroll {
+    overflow: visible;
+  }
+
+  .rb-entry {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ccc;
+    background: white !important;
+  }
+
+  .rb-entry:hover { background: white !important; }
+
+  .print-header {
+    display: block !important;
+    padding: 0 0 16px;
+    border-bottom: 3px solid #333;
+    margin-bottom: 8px;
+  }
+
+  .rb-table-header { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .rb-tulip svg { width: 60px !important; height: 48px !important; }
+  .rb-entry { min-height: 72px; }
+}
+
+.print-header { display: none; }
+
+/* ═══════════════════════════════════════════════
+   LOADING
+═══════════════════════════════════════════════ */
+.loading-bar {
+  height: 3px;
+  background: var(--orange);
+  width: 0%;
+  transition: width 0.3s ease;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════ */
+.roadbook-scroll::-webkit-scrollbar { width: 5px; }
+.roadbook-scroll::-webkit-scrollbar-track { background: var(--sand); }
+.roadbook-scroll::-webkit-scrollbar-thumb { background: var(--beige); border-radius: 3px; }
+.roadbook-scroll::-webkit-scrollbar-thumb:hover { background: var(--copper); }
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--dark-bg);
+  color: var(--off-white);
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  border-left: 3px solid var(--orange);
+  transition: transform 0.25s ease;
+  z-index: 9999;
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<header class="app-header">
+  <div class="logo">
+    <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
+      <path d="M16 2 L28 8 L28 22 L16 30 L4 22 L4 8 Z" fill="#D96A27" opacity="0.2"/>
+      <path d="M16 5 L26 10.5 L26 21.5 L16 27 L6 21.5 L6 10.5 Z" stroke="#D96A27" stroke-width="1.5" fill="none"/>
+      <path d="M10 16 Q13 10 16 14 Q19 18 22 12" stroke="#FAF9F7" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <circle cx="10" cy="16" r="2" fill="#D96A27"/>
+      <circle cx="22" cy="12" r="2" fill="#A88C6E"/>
+    </svg>
+    <span class="logo-text">Endurious <span>Roadbook</span> Creator</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-secondary" id="btn-new" style="display:none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      New Route
+    </button>
+    <button class="btn btn-secondary" id="btn-print" style="display:none" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+      Print
+    </button>
+    <button class="btn btn-primary" id="btn-pdf" style="display:none" onclick="exportPDF()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download PDF
+    </button>
+  </div>
+</header>
+
+<!-- ═══════════════ UPLOAD SCREEN ═══════════════ -->
+<div id="upload-screen">
+  <div class="upload-card" id="drop-zone">
+    <div class="upload-icon">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+        <circle cx="28" cy="28" r="27" stroke="#DCD8D2" stroke-width="1.5"/>
+        <path d="M28 18 L36 26 L31 26 L31 38 L25 38 L25 26 L20 26 Z" fill="#D96A27"/>
+        <path d="M18 40 L38 40" stroke="#A88C6E" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="upload-title">Drop your GPX file here</div>
+    <div class="upload-subtitle">or click to browse — supports track & waypoint GPX files</div>
+    <div class="upload-btn-wrap">
+      <button class="btn btn-primary" onclick="document.getElementById('gpx-file-input').click()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Upload GPX File
+      </button>
+    </div>
+    <div class="upload-note">Supports on-road and off-road GPX routes · Dakar-style tulip roadbook</div>
+    <input type="file" id="gpx-file-input" accept=".gpx">
+  </div>
+</div>
+
+<!-- ═══════════════ WORKSPACE ═══════════════ -->
+<div id="workspace">
+
+  <!-- Toolbar -->
+  <div class="workspace-toolbar">
+    <div class="density-control">
+      <label>Density</label>
+      <input type="range" id="density-slider" min="50" max="1000" value="200" step="50" oninput="onDensityChange(this.value)">
+      <span class="density-value" id="density-display">200m</span>
+    </div>
+    <div class="toolbar-sep"></div>
+    <button class="btn btn-ghost btn-sm" onclick="addManualEntry(null)">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Add Waypoint
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="regenerate()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      Regenerate
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="splitTrackAtMarkers()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Add Trackpoints
+    </button>
+    <span class="route-info-badge" id="route-badge">—</span>
+  </div>
+
+  <div class="workspace-panels">
+
+    <!-- Map Panel -->
+    <div class="map-panel">
+      <div class="panel-header">
+        <span class="panel-title">Route Map</span>
+        <span class="panel-hint">Click on route to insert waypoint</span>
+      </div>
+      <div id="map"></div>
+    </div>
+
+    <!-- Roadbook Panel -->
+    <div class="roadbook-panel">
+      <!-- Print header (only visible in print) -->
+      <div class="print-header" id="print-header">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#1A1A1A;letter-spacing:0.5px;">
+          ENDURIOUS ROADBOOK CREATOR
+        </div>
+        <div id="print-route-info" style="font-size:13px;color:#A88C6E;margin-top:4px;"></div>
+      </div>
+
+      <!-- Roadbook header -->
+      <div class="roadbook-header">
+        <span class="panel-title">Roadbook</span>
+        <span class="panel-hint" style="margin-left:auto;" id="rb-entry-count">0 entries</span>
+      </div>
+
+      <!-- Table header -->
+      <div class="rb-table-header">
+        <div class="rb-th">Dist (km)</div>
+        <div class="rb-th">Tulip</div>
+        <div class="rb-th">Instruction</div>
+        <div class="rb-th">Actions</div>
+      </div>
+
+      <!-- Scrollable entries -->
+      <div class="roadbook-scroll" id="roadbook-entries"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ TULIP PICKER MODAL ═══════════════ -->
+<div class="modal-overlay" id="tulip-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Choose Tulip</span>
+      <button class="modal-close" onclick="closeTulipModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tulip-grid" id="tulip-grid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeTulipModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="applyTulip()">Apply Tulip</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   TULIP DEFINITIONS — Dakar-style SVG tulips
+═══════════════════════════════════════════════ */
+var TULIP_DEFS = [
+  { id: 'straight',      label: 'Straight',       svg: buildStraight() },
+  { id: 'slight-right',  label: 'Slight Right',   svg: buildSlightRight() },
+  { id: 'slight-left',   label: 'Slight Left',    svg: buildSlightLeft() },
+  { id: 'turn-right',    label: 'Turn Right',     svg: buildTurnRight() },
+  { id: 'turn-left',     label: 'Turn Left',      svg: buildTurnLeft() },
+  { id: 'sharp-right',   label: 'Sharp Right',    svg: buildSharpRight() },
+  { id: 'sharp-left',    label: 'Sharp Left',     svg: buildSharpLeft() },
+  { id: 'u-turn-right',  label: 'U-turn Right',   svg: buildUTurnRight() },
+  { id: 'u-turn-left',   label: 'U-turn Left',    svg: buildUTurnLeft() },
+  { id: 'fork-right',    label: 'Fork Right',     svg: buildForkRight() },
+  { id: 'fork-left',     label: 'Fork Left',      svg: buildForkLeft() },
+  { id: 'fork-straight', label: 'Fork Straight',  svg: buildForkStraight() },
+  { id: 'roundabout-r',  label: 'R-about R',      svg: buildRoundaboutRight() },
+  { id: 'roundabout-l',  label: 'R-about L',      svg: buildRoundaboutLeft() },
+  { id: 'cross-right',   label: 'Cross Right',    svg: buildCrossRight() },
+  { id: 'cross-left',    label: 'Cross Left',     svg: buildCrossLeft() },
+  { id: 'cross-straight',label: 'Cross Straight', svg: buildCrossStraight() },
+  { id: 'waypoint',      label: 'Waypoint',       svg: buildWaypoint() },
+  { id: 'start',         label: 'Start',          svg: buildStart() },
+  { id: 'finish',        label: 'Finish',         svg: buildFinish() },
+];
+
+/* SVG builder helpers */
+function makeSVG(content) { return `<svg viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg">${content}</svg>`; }
+var ROAD_W = 6;
+var ROAD_COLOR = '#1A1A1A'; // path color
+var ARROW_COLOR = '#D96A27'; // arrow color
+
+function arrowHead(x, y, dir) {
+  // dir: 'up','down','left','right'
+  const sz = 5;
+  const arrows = {
+    up:    `M${x},${y} L${x-sz},${y+sz*1.5} L${x+sz},${y+sz*1.5} Z`,
+    down:  `M${x},${y} L${x-sz},${y-sz*1.5} L${x+sz},${y-sz*1.5} Z`,
+    right: `M${x},${y} L${x-sz*1.5},${y-sz} L${x-sz*1.5},${y+sz} Z`,
+    left:  `M${x},${y} L${x+sz*1.5},${y-sz} L${x+sz*1.5},${y+sz} Z`,
+  };
+  return `<path d="${arrows[dir]}" fill="${ARROW_COLOR}"/>`;
+}
+
+function buildStraight() {
+  return makeSVG(`
+    <rect x="33" y="4" width="${ROAD_W}" height="48" rx="2" fill="${ROAD_COLOR}"/>
+    ${arrowHead(36, 4, 'up')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildSlightRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 26 Q33 10 52 10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(52, 7, 'right')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildSlightLeft() {
+  return makeSVG(`
+    <path d="M39 52 L39 26 Q39 10 20 10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(20, 7, 'left')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildTurnRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 28 Q33 18 46 18 L66 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(66, 18, 'right')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildTurnLeft() {
+  return makeSVG(`
+    <path d="M39 52 L39 28 Q39 18 26 18 L6 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(6, 18, 'left')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildSharpRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 32 Q33 24 40 20 L58 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(60, 6, 'right')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildSharpLeft() {
+  return makeSVG(`
+    <path d="M39 52 L39 32 Q39 24 32 20 L14 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(12, 6, 'left')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildUTurnRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 24 Q33 8 44 8 Q55 8 55 22 L55 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(55, 28, 'down')}
+    <circle cx="36" cy="40" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildUTurnLeft() {
+  return makeSVG(`
+    <path d="M39 52 L39 24 Q39 8 28 8 Q17 8 17 22 L17 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(17, 28, 'down')}
+    <circle cx="36" cy="40" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildForkRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 32" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 32 L33 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.35"/>
+    <path d="M33 32 Q36 22 52 14" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(54, 12, 'right')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildForkLeft() {
+  return makeSVG(`
+    <path d="M39 52 L39 32" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 32 L39 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.35"/>
+    <path d="M39 32 Q36 22 20 14" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(18, 12, 'left')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildForkStraight() {
+  return makeSVG(`
+    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 28 Q40 22 56 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.35"/>
+    ${arrowHead(36, 4, 'up')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildRoundaboutRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 36" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <circle cx="36" cy="26" r="10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W-1}" fill="none"/>
+    <path d="M46 26 L66 26" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(66, 26, 'right')}
+    <circle cx="36" cy="42" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <path d="M31 17 L36 14 L41 17" fill="${ARROW_COLOR}"/>
+  `);
+}
+function buildRoundaboutLeft() {
+  return makeSVG(`
+    <path d="M39 52 L39 36" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <circle cx="36" cy="26" r="10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W-1}" fill="none"/>
+    <path d="M26 26 L6 26" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(6, 26, 'left')}
+    <circle cx="36" cy="42" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <path d="M31 17 L36 14 L41 17" fill="${ARROW_COLOR}"/>
+  `);
+}
+function buildCrossRight() {
+  return makeSVG(`
+    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M6 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M33 52 L33 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(66, 28, 'right')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildCrossLeft() {
+  return makeSVG(`
+    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M6 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M39 52 L39 28 L6 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(6, 28, 'left')}
+    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildCrossStraight() {
+  return makeSVG(`
+    <path d="M6 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(36, 4, 'up')}
+    <circle cx="36" cy="42" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+  `);
+}
+function buildWaypoint() {
+  return makeSVG(`
+    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(36, 4, 'up')}
+    <circle cx="36" cy="28" r="8" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="28" r="4" fill="white"/>
+  `);
+}
+function buildStart() {
+  return makeSVG(`
+    <path d="M33 52 L33 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    ${arrowHead(36, 14, 'up')}
+    <rect x="22" y="6" width="28" height="14" rx="3" fill="#27ae60"/>
+    <text x="36" y="17" font-family="sans-serif" font-size="9" font-weight="700" fill="white" text-anchor="middle">START</text>
+  `);
+}
+function buildFinish() {
+  return makeSVG(`
+    <path d="M33 8 L33 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <rect x="22" y="34" width="28" height="14" rx="3" fill="#c0392b"/>
+    <text x="36" y="45" font-family="sans-serif" font-size="9" font-weight="700" fill="white" text-anchor="middle">FINISH</text>
+    <circle cx="36" cy="28" r="5" fill="${ROAD_COLOR}"/>
+  `);
+}
+
+/* ═══════════════════════════════════════════════
+   GPX PARSER
+═══════════════════════════════════════════════ */
+function parseGPX(text) {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'application/xml');
+  const points = [];
+
+  // Track points
+  const trkpts = doc.querySelectorAll('trkpt');
+  trkpts.forEach(pt => {
+    points.push({
+      lat: parseFloat(pt.getAttribute('lat')),
+      lon: parseFloat(pt.getAttribute('lon')),
+      ele: parseFloat(pt.querySelector('ele')?.textContent || 0),
+      name: pt.querySelector('name')?.textContent || null,
+      type: 'track'
+    });
+  });
+
+  // Route points (rte)
+  if (points.length === 0) {
+    const rtepts = doc.querySelectorAll('rtept');
+    rtepts.forEach(pt => {
+      points.push({
+        lat: parseFloat(pt.getAttribute('lat')),
+        lon: parseFloat(pt.getAttribute('lon')),
+        ele: parseFloat(pt.querySelector('ele')?.textContent || 0),
+        name: pt.querySelector('name')?.textContent || null,
+        type: 'route'
+      });
+    });
+  }
+
+  // Waypoints
+  const wpts = doc.querySelectorAll('wpt');
+  const waypoints = [];
+  wpts.forEach(pt => {
+    waypoints.push({
+      lat: parseFloat(pt.getAttribute('lat')),
+      lon: parseFloat(pt.getAttribute('lon')),
+      name: pt.querySelector('name')?.textContent || 'Waypoint',
+      desc: pt.querySelector('desc')?.textContent || '',
+      type: 'waypoint'
+    });
+  });
+
+  return { points, waypoints };
+}
+
+/* ═══════════════════════════════════════════════
+   GEO UTILS
+═══════════════════════════════════════════════ */
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function bearing(lat1, lon1, lat2, lon2) {
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2 * Math.PI / 180);
+  const x = Math.cos(lat1 * Math.PI / 180) * Math.sin(lat2 * Math.PI / 180) -
+             Math.sin(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.cos(dLon);
+  return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+function angleDiff(b1, b2) {
+  let d = b2 - b1;
+  if (d > 180) d -= 360;
+  if (d < -180) d += 360;
+  return d;
+}
+
+function classifyTurn(angle) {
+  const a = Math.abs(angle);
+  const side = angle > 0 ? 'right' : 'left';
+  if (a < 15) return 'straight';
+  if (a < 35) return `slight-${side}`;
+  if (a < 70) return `turn-${side}`;
+  if (a < 130) return `sharp-${side}`;
+  return `u-turn-${side}`;
+}
+
+function detectTulip(prevBearing, nextBearing, crossroads) {
+  const turn = angleDiff(prevBearing, nextBearing);
+  const type = classifyTurn(turn);
+  if (crossroads > 2 && Math.abs(turn) < 40) {
+    const side = turn > 0 ? 'right' : (turn < -5 ? 'left' : 'straight');
+    return `cross-${side}`;
+  }
+  return type;
+}
+
+/* ═══════════════════════════════════════════════
+   APP STATE
+═══════════════════════════════════════════════ */
+let state = {
+  trackPoints: [],
+  waypoints: [],
+  roadbook: [],
+  gpxName: '',
+  totalDistance: 0,
+  densityM: 200,
+  editingIdx: null,
+  tulipModalIdx: null,
+  selectedTulipId: null,
+  map: null,
+  trackLine: null,
+  markers: [],
+};
+
+/* ═══════════════════════════════════════════════
+   MAP SETUP
+═══════════════════════════════════════════════ */
+function initMap() {
+  if (state.map) return;
+  state.map = L.map('map', { zoomControl: true });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(state.map);
+
+  // Click on map to add waypoint
+  state.map.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    // Find nearest point on track
+    const idx = nearestTrackIdx(lat, lng);
+    insertManualAtTrackIdx(idx, lat, lng);
+  });
+}
+
+function nearestTrackIdx(lat, lon) {
+  let best = 0, bestD = Infinity;
+  state.trackPoints.forEach((p, i) => {
+    const d = haversine(lat, lon, p.lat, p.lon);
+    if (d < bestD) { bestD = d; best = i; }
+  });
+  return best;
+}
+
+function drawTrack() {
+  if (!state.map) return;
+  // Remove existing
+  state.markers.forEach(m => state.map.removeLayer(m));
+  state.markers = [];
+  if (state.trackLine) state.map.removeLayer(state.trackLine);
+
+  const latlngs = state.trackPoints.map(p => [p.lat, p.lon]);
+  state.trackLine = L.polyline(latlngs, {
+    color: '#D96A27',
+    weight: 3,
+    opacity: 0.85
+  }).addTo(state.map);
+
+  state.map.fitBounds(state.trackLine.getBounds(), { padding: [20, 20] });
+
+  // Start & end markers
+  if (latlngs.length > 0) {
+    addMapMarker(latlngs[0][0], latlngs[0][1], 'start', 'Start');
+    addMapMarker(latlngs[latlngs.length-1][0], latlngs[latlngs.length-1][1], 'end', 'Finish');
+  }
+
+  // Roadbook markers
+  state.roadbook.forEach((entry, i) => {
+    if (entry.type === 'manual' || entry.type === 'waypoint') {
+      addMapMarker(entry.lat, entry.lon, 'waypoint', entry.instruction, i);
+    } else if (entry.tulipId !== 'straight') {
+      addMapMarker(entry.lat, entry.lon, 'turn', entry.instruction, i);
+    }
+  });
+}
+
+function addMapMarker(lat, lon, type, label, rbIdx) {
+  let className = 'rb-marker';
+  if (type === 'start') className += ' start-marker';
+  else if (type === 'end') className += ' end-marker';
+
+  const icon = L.divIcon({
+    className: '',
+    html: `<div class="${className}" title="${label||''}"></div>`,
+    iconSize: [12, 12],
+    iconAnchor: [6, 6]
+  });
+  const m = L.marker([lat, lon], { icon })
+    .addTo(state.map)
+    .bindPopup(`<b>${label||''}</b>`);
+  if (rbIdx !== undefined) {
+    m.on('click', () => {
+      scrollToEntry(rbIdx);
+      highlightEntry(rbIdx);
+    });
+  }
+  state.markers.push(m);
+}
+
+/* ═══════════════════════════════════════════════
+   GENERATE ROADBOOK
+═══════════════════════════════════════════════ */
+function generateRoadbook() {
+  const pts = state.trackPoints;
+  if (pts.length < 2) return;
+
+  const entries = [];
+  let cumDist = 0;
+  let lastEntryDist = 0;
+  let prevBearing = null;
+  let segStart = 0;
+
+  // Compute cumulative distances
+  const cumDistances = [0];
+  for (let i = 1; i < pts.length; i++) {
+    cumDistances.push(cumDistances[i-1] + haversine(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon));
+  }
+
+  state.totalDistance = cumDistances[pts.length - 1];
+
+  // Start entry
+  entries.push({
+    id: uid(),
+    lat: pts[0].lat,
+    lon: pts[0].lon,
+    distTotal: 0,
+    distPartial: 0,
+    tulipId: 'start',
+    instruction: 'Départ / Start',
+    note: '',
+    type: 'auto',
+    trackIdx: 0,
+  });
+
+  const minDist = state.densityM;
+
+  for (let i = 1; i < pts.length - 1; i++) {
+    cumDist = cumDistances[i];
+    const b1 = bearing(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
+    const b2 = bearing(pts[i].lat, pts[i].lon, pts[i+1].lat, pts[i+1].lon);
+    const turn = Math.abs(angleDiff(b1, b2));
+    const distSinceLast = cumDist - lastEntryDist;
+
+    // Keep manual/waypoint entries that the user inserted
+    const manualEntry = entries.find(e => e.trackIdx === i && (e.type === 'manual' || e.type === 'waypoint'));
+    if (manualEntry) { lastEntryDist = cumDist; prevBearing = b2; continue; }
+
+    if (turn > 12 && distSinceLast >= minDist * 0.4) {
+      const tulipId = detectTulip(b1, b2, 1);
+      const label = tulipLabel(tulipId);
+      entries.push({
+        id: uid(),
+        lat: pts[i].lat,
+        lon: pts[i].lon,
+        distTotal: cumDist,
+        distPartial: cumDist - lastEntryDist,
+        tulipId,
+        instruction: label,
+        note: '',
+        type: 'auto',
+        trackIdx: i,
+      });
+      lastEntryDist = cumDist;
+    } else if (distSinceLast >= minDist) {
+      // Distance-based waypoint
+      entries.push({
+        id: uid(),
+        lat: pts[i].lat,
+        lon: pts[i].lon,
+        distTotal: cumDist,
+        distPartial: cumDist - lastEntryDist,
+        tulipId: 'waypoint',
+        instruction: 'Continue',
+        note: '',
+        type: 'auto',
+        trackIdx: i,
+      });
+      lastEntryDist = cumDist;
+    }
+    prevBearing = b2;
+  }
+
+  // Add existing manual entries
+  const manuals = state.roadbook.filter(e => e.type === 'manual');
+  entries.push(...manuals);
+
+  // Finish entry
+  const lastIdx = pts.length - 1;
+  entries.push({
+    id: uid(),
+    lat: pts[lastIdx].lat,
+    lon: pts[lastIdx].lon,
+    distTotal: cumDistances[lastIdx],
+    distPartial: cumDistances[lastIdx] - lastEntryDist,
+    tulipId: 'finish',
+    instruction: 'Arrivée / Finish',
+    note: '',
+    type: 'auto',
+    trackIdx: lastIdx,
+  });
+
+  // Sort by track distance
+  entries.sort((a, b) => a.distTotal - b.distTotal);
+
+  // Recalc partials
+  for (let i = 1; i < entries.length; i++) {
+    entries[i].distPartial = entries[i].distTotal - entries[i-1].distTotal;
+  }
+
+  state.roadbook = entries;
+}
+
+function tulipLabel(id) {
+  const t = TULIP_DEFS.find(t => t.id === id);
+  return t ? t.label : id;
+}
+
+function uid() {
+  return Math.random().toString(36).substr(2, 9);
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER ROADBOOK
+═══════════════════════════════════════════════ */
+function renderRoadbook() {
+  const container = document.getElementById('roadbook-entries');
+  container.innerHTML = '';
+
+  state.roadbook.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'rb-entry';
+    row.id = `rb-row-${entry.id}`;
+    row.dataset.idx = i;
+
+    const distTotal = (entry.distTotal / 1000).toFixed(2);
+    const distPartial = (entry.distPartial / 1000).toFixed(2);
+    const tulip = TULIP_DEFS.find(t => t.id === entry.tulipId) || TULIP_DEFS[0];
+    const isEditing = state.editingIdx === i;
+
+    row.innerHTML = `
+      <!-- Distance -->
+      <div class="rb-cell rb-dist">
+        <div class="dist-total">${distTotal}</div>
+        <div class="dist-partial">+${distPartial}</div>
+      </div>
+
+      <!-- Tulip -->
+      <div class="rb-cell rb-tulip">
+        <div class="tulip-svg-wrap" onclick="openTulipModal(${i})" title="Change tulip">
+          ${tulip.svg}
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="rb-cell rb-desc">
+        ${isEditing ? `
+          <div class="rb-edit-fields">
+            <input class="rb-input" id="edit-inst-${i}" value="${escHtml(entry.instruction)}" placeholder="Instruction">
+            <input class="rb-input" id="edit-note-${i}" value="${escHtml(entry.note)}" placeholder="Note (optional)">
+            <div style="display:flex;gap:4px;margin-top:2px;">
+              <button class="btn btn-primary btn-sm" onclick="saveEdit(${i})">Save</button>
+              <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">Cancel</button>
+            </div>
+          </div>
+        ` : `
+          <div class="rb-instruction">${escHtml(entry.instruction)}</div>
+          ${entry.note ? `<div class="rb-note">${escHtml(entry.note)}</div>` : ''}
+        `}
+      </div>
+
+      <!-- Actions -->
+      <div class="rb-cell rb-actions">
+        <button class="btn btn-ghost btn-sm" onclick="startEdit(${i})" title="Edit">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="addManualEntry(${i})" title="Insert below">➕</button>
+        ${entry.type !== 'auto' || (entry.tulipId !== 'start' && entry.tulipId !== 'finish') ? 
+          `<button class="btn btn-danger btn-sm" onclick="deleteEntry(${i})" title="Delete">✕</button>` : ''}
+      </div>
+    `;
+
+    container.appendChild(row);
+
+    // Add a thin insert-row between entries
+    if (i < state.roadbook.length - 1) {
+      const addRow = document.createElement('div');
+      addRow.className = 'rb-entry add-row';
+      addRow.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Insert here`;
+      addRow.onclick = () => addManualEntry(i);
+      container.appendChild(addRow);
+    }
+  });
+
+  // Update counts
+  document.getElementById('rb-entry-count').textContent = `${state.roadbook.length} entries`;
+  document.getElementById('route-badge').textContent =
+    `${(state.totalDistance / 1000).toFixed(1)} km · ${state.roadbook.length} waypoints`;
+
+  // Print info
+  document.getElementById('print-route-info').textContent =
+    `${state.gpxName} · ${(state.totalDistance / 1000).toFixed(1)} km · ${state.roadbook.length} entries`;
+}
+
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ═══════════════════════════════════════════════
+   EDIT ENTRIES
+═══════════════════════════════════════════════ */
+function startEdit(idx) {
+  state.editingIdx = idx;
+  renderRoadbook();
+  setTimeout(() => {
+    const el = document.getElementById(`edit-inst-${idx}`);
+    if (el) el.focus();
+  }, 50);
+}
+
+function saveEdit(idx) {
+  const inst = document.getElementById(`edit-inst-${idx}`)?.value || '';
+  const note = document.getElementById(`edit-note-${idx}`)?.value || '';
+  state.roadbook[idx].instruction = inst;
+  state.roadbook[idx].note = note;
+  state.editingIdx = null;
+  renderRoadbook();
+}
+
+function cancelEdit() {
+  state.editingIdx = null;
+  renderRoadbook();
+}
+
+function deleteEntry(idx) {
+  state.roadbook.splice(idx, 1);
+  // Recalc partials
+  recalcPartials();
+  renderRoadbook();
+  drawTrack();
+  toast('Entry removed');
+}
+
+function recalcPartials() {
+  for (let i = 1; i < state.roadbook.length; i++) {
+    state.roadbook[i].distPartial = state.roadbook[i].distTotal - state.roadbook[i-1].distTotal;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ADD MANUAL ENTRY
+═══════════════════════════════════════════════ */
+function addManualEntry(afterIdx) {
+  let lat, lon, distTotal, trackIdx;
+
+  if (afterIdx !== null && state.roadbook[afterIdx]) {
+    const cur = state.roadbook[afterIdx];
+    const next = state.roadbook[afterIdx + 1];
+    if (next) {
+      distTotal = (cur.distTotal + next.distTotal) / 2;
+      lat = (cur.lat + next.lat) / 2;
+      lon = (cur.lon + next.lon) / 2;
+    } else {
+      distTotal = cur.distTotal;
+      lat = cur.lat;
+      lon = cur.lon;
+    }
+    trackIdx = cur.trackIdx;
+  } else {
+    const last = state.roadbook[state.roadbook.length - 1];
+    distTotal = last ? last.distTotal : 0;
+    lat = state.trackPoints[0]?.lat || 0;
+    lon = state.trackPoints[0]?.lon || 0;
+    trackIdx = 0;
+  }
+
+  const newEntry = {
+    id: uid(),
+    lat, lon,
+    distTotal,
+    distPartial: 0,
+    tulipId: 'waypoint',
+    instruction: 'Custom Waypoint',
+    note: '',
+    type: 'manual',
+    trackIdx,
+  };
+
+  const insertAt = afterIdx !== null ? afterIdx + 1 : state.roadbook.length;
+  state.roadbook.splice(insertAt, 0, newEntry);
+  recalcPartials();
+
+  state.editingIdx = insertAt;
+  renderRoadbook();
+  drawTrack();
+  scrollToEntry(insertAt);
+  toast('Waypoint added — edit the details');
+}
+
+function insertManualAtTrackIdx(tIdx, lat, lon) {
+  // Find where to insert in roadbook based on track index
+  let insertAt = state.roadbook.length - 1;
+  for (let i = 0; i < state.roadbook.length - 1; i++) {
+    if (state.roadbook[i].trackIdx <= tIdx && state.roadbook[i+1].trackIdx > tIdx) {
+      insertAt = i + 1;
+      break;
+    }
+  }
+
+  // Compute dist from nearest roadbook entry before
+  const prev = state.roadbook[insertAt - 1];
+  const distTotal = prev ? prev.distTotal + haversine(prev.lat, prev.lon, lat, lon) : 0;
+
+  const newEntry = {
+    id: uid(),
+    lat, lon,
+    distTotal,
+    distPartial: 0,
+    tulipId: 'waypoint',
+    instruction: 'Custom Waypoint',
+    note: '',
+    type: 'manual',
+    trackIdx: tIdx,
+  };
+
+  state.roadbook.splice(insertAt, 0, newEntry);
+  recalcPartials();
+  state.editingIdx = insertAt;
+  renderRoadbook();
+  drawTrack();
+  scrollToEntry(insertAt);
+  toast('Waypoint inserted from map click');
+}
+
+function scrollToEntry(idx) {
+  const el = document.getElementById(`rb-row-${state.roadbook[idx]?.id}`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function highlightEntry(idx) {
+  document.querySelectorAll('.rb-entry').forEach(e => e.classList.remove('selected'));
+  const el = document.getElementById(`rb-row-${state.roadbook[idx]?.id}`);
+  if (el) el.classList.add('selected');
+}
+
+/* ═══════════════════════════════════════════════
+   TULIP MODAL
+═══════════════════════════════════════════════ */
+function buildTulipGrid() {
+  const grid = document.getElementById('tulip-grid');
+  grid.innerHTML = '';
+  TULIP_DEFS.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tulip-option';
+    el.dataset.id = t.id;
+    el.innerHTML = `${t.svg}<div class="tulip-label">${t.label}</div>`;
+    el.onclick = () => selectTulipOption(t.id);
+    grid.appendChild(el);
+  });
+}
+
+function openTulipModal(idx) {
+  state.tulipModalIdx = idx;
+  state.selectedTulipId = state.roadbook[idx].tulipId;
+  document.querySelectorAll('.tulip-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === state.selectedTulipId);
+  });
+  document.getElementById('tulip-modal').classList.add('open');
+}
+
+function selectTulipOption(id) {
+  state.selectedTulipId = id;
+  document.querySelectorAll('.tulip-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === id);
+  });
+}
+
+function applyTulip() {
+  if (state.tulipModalIdx !== null && state.selectedTulipId) {
+    state.roadbook[state.tulipModalIdx].tulipId = state.selectedTulipId;
+    state.roadbook[state.tulipModalIdx].instruction = tulipLabel(state.selectedTulipId);
+    renderRoadbook();
+  }
+  closeTulipModal();
+}
+
+function closeTulipModal() {
+  document.getElementById('tulip-modal').classList.remove('open');
+  state.tulipModalIdx = null;
+}
+
+/* ═══════════════════════════════════════════════
+   DENSITY / REGENERATE
+═══════════════════════════════════════════════ */
+function onDensityChange(val) {
+  state.densityM = parseInt(val);
+  document.getElementById('density-display').textContent = val >= 1000 ? `${val/1000}km` : `${val}m`;
+}
+
+function regenerate() {
+  // Preserve manual entries
+  const manuals = state.roadbook.filter(e => e.type === 'manual');
+  generateRoadbook();
+  // Re-merge manuals
+  manuals.forEach(m => {
+    // Find insertion point
+    let insertAt = state.roadbook.length - 1;
+    for (let i = 0; i < state.roadbook.length - 1; i++) {
+      if (state.roadbook[i].distTotal <= m.distTotal && state.roadbook[i+1].distTotal > m.distTotal) {
+        insertAt = i + 1;
+        break;
+      }
+    }
+    state.roadbook.splice(insertAt, 0, m);
+  });
+  recalcPartials();
+  renderRoadbook();
+  drawTrack();
+  toast('Roadbook regenerated');
+}
+
+/* ═══════════════════════════════════════════════
+   ADD TRACKPOINTS (densify)
+═══════════════════════════════════════════════ */
+function splitTrackAtMarkers() {
+  // Interpolate extra points every ~50m between existing points
+  const pts = state.trackPoints;
+  const newPts = [];
+  const interpDist = 30; // meters
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    newPts.push(pts[i]);
+    const d = haversine(pts[i].lat, pts[i].lon, pts[i+1].lat, pts[i+1].lon);
+    const steps = Math.floor(d / interpDist);
+    for (let j = 1; j < steps; j++) {
+      const frac = j / steps;
+      newPts.push({
+        lat: pts[i].lat + (pts[i+1].lat - pts[i].lat) * frac,
+        lon: pts[i].lon + (pts[i+1].lon - pts[i].lon) * frac,
+        ele: pts[i].ele + (pts[i+1].ele - pts[i].ele) * frac,
+        type: 'interpolated'
+      });
+    }
+  }
+  newPts.push(pts[pts.length - 1]);
+  state.trackPoints = newPts;
+  toast(`Track densified: ${newPts.length} points. Regenerating…`);
+  setTimeout(() => regenerate(), 300);
+}
+
+/* ═══════════════════════════════════════════════
+   FILE LOADING
+═══════════════════════════════════════════════ */
+function loadGPX(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const { points, waypoints } = parseGPX(e.target.result);
+    if (points.length < 2) {
+      toast('No valid track points found in GPX file.');
+      return;
+    }
+    state.trackPoints = points;
+    state.waypoints = waypoints;
+    state.gpxName = file.name.replace('.gpx','').replace(/_/g,' ');
+    state.roadbook = [];
+    state.editingIdx = null;
+
+    showWorkspace();
+    initMap();
+    generateRoadbook();
+    renderRoadbook();
+    drawTrack();
+    toast(`Loaded: ${state.gpxName} · ${points.length} track points`);
+  };
+  reader.readAsText(file);
+}
+
+function showWorkspace() {
+  document.getElementById('upload-screen').style.display = 'none';
+  document.getElementById('workspace').style.display = 'flex';
+  document.getElementById('btn-new').style.display = '';
+  document.getElementById('btn-print').style.display = '';
+  document.getElementById('btn-pdf').style.display = '';
+
+  // Trigger map resize after layout settles
+  setTimeout(() => {
+    if (state.map) state.map.invalidateSize();
+  }, 200);
+}
+
+/* ═══════════════════════════════════════════════
+   PDF EXPORT
+═══════════════════════════════════════════════ */
+function exportPDF() {
+  toast('Preparing PDF… use browser print dialog');
+  setTimeout(() => window.print(), 300);
+}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ═══════════════════════════════════════════════
+   DRAG & DROP
+═══════════════════════════════════════════════ */
+const dropZone = document.getElementById('drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.name.endsWith('.gpx')) loadGPX(file);
+  else toast('Please drop a .gpx file');
+});
+
+document.getElementById('gpx-file-input').addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) loadGPX(file);
+});
+
+/* ═══════════════════════════════════════════════
+   NEW ROUTE
+═══════════════════════════════════════════════ */
+document.getElementById('btn-new').addEventListener('click', () => {
+  state = { ...state, trackPoints: [], waypoints: [], roadbook: [], gpxName: '', totalDistance: 0, editingIdx: null };
+  document.getElementById('upload-screen').style.display = '';
+  document.getElementById('workspace').style.display = 'none';
+  document.getElementById('btn-new').style.display = 'none';
+  document.getElementById('btn-print').style.display = 'none';
+  document.getElementById('btn-pdf').style.display = 'none';
+  document.getElementById('gpx-file-input').value = '';
+});
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+buildTulipGrid();
+</script>
+</body>
+</html>
