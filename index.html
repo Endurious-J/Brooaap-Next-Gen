@@ -923,155 +923,155 @@ function arrowHead(x, y, dir) {
     right: `M${x},${y} L${x-sz*1.5},${y-sz} L${x-sz*1.5},${y+sz} Z`,
     left:  `M${x},${y} L${x+sz*1.5},${y-sz} L${x+sz*1.5},${y+sz} Z`,
   };
-  return `<path d="${arrows[dir]}" fill="${ARROW_COLOR}"/>`;
+  return `<path d="${arrows[dir]}" fill="#D96A27"/>`;
 }
 
 function buildStraight() {
   return makeSVG(`
-    <rect x="33" y="4" width="${ROAD_W}" height="48" rx="2" fill="${ROAD_COLOR}"/>
+    <rect x="33" y="4" width="7" height="48" rx="2" fill="#111111"/>
     ${arrowHead(36, 4, 'up')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildSlightRight() {
   return makeSVG(`
-    <path d="M33 52 L33 26 Q33 10 52 10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 26 Q33 10 52 10" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(52, 7, 'right')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildSlightLeft() {
   return makeSVG(`
-    <path d="M39 52 L39 26 Q39 10 20 10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 52 L39 26 Q39 10 20 10" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(20, 7, 'left')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildTurnRight() {
   return makeSVG(`
-    <path d="M33 52 L33 28 Q33 18 46 18 L66 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 28 Q33 18 46 18 L66 18" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(66, 18, 'right')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildTurnLeft() {
   return makeSVG(`
-    <path d="M39 52 L39 28 Q39 18 26 18 L6 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 52 L39 28 Q39 18 26 18 L6 18" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(6, 18, 'left')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildSharpRight() {
   return makeSVG(`
-    <path d="M33 52 L33 32 Q33 24 40 20 L58 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 32 Q33 24 40 20 L58 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(60, 6, 'right')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildSharpLeft() {
   return makeSVG(`
-    <path d="M39 52 L39 32 Q39 24 32 20 L14 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 52 L39 32 Q39 24 32 20 L14 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(12, 6, 'left')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildUTurnRight() {
   return makeSVG(`
-    <path d="M33 52 L33 24 Q33 8 44 8 Q55 8 55 22 L55 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 24 Q33 8 44 8 Q55 8 55 22 L55 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(55, 28, 'down')}
-    <circle cx="36" cy="40" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="40" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildUTurnLeft() {
   return makeSVG(`
-    <path d="M39 52 L39 24 Q39 8 28 8 Q17 8 17 22 L17 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 52 L39 24 Q39 8 28 8 Q17 8 17 22 L17 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(17, 28, 'down')}
-    <circle cx="36" cy="40" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="40" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildForkRight() {
   return makeSVG(`
-    <path d="M33 52 L33 32" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
-    <path d="M33 32 L33 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.35"/>
-    <path d="M33 32 Q36 22 52 14" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 32" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M33 32 L33 18" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.35"/>
+    <path d="M33 32 Q36 22 52 14" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(54, 12, 'right')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildForkLeft() {
   return makeSVG(`
-    <path d="M39 52 L39 32" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
-    <path d="M39 32 L39 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.35"/>
-    <path d="M39 32 Q36 22 20 14" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 52 L39 32" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M39 32 L39 18" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.35"/>
+    <path d="M39 32 Q36 22 20 14" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(18, 12, 'left')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildForkStraight() {
   return makeSVG(`
-    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
-    <path d="M33 28 Q40 22 56 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.35"/>
+    <path d="M33 52 L33 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M33 28 Q40 22 56 18" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.35"/>
     ${arrowHead(36, 4, 'up')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildRoundaboutRight() {
   return makeSVG(`
-    <path d="M33 52 L33 36" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
-    <circle cx="36" cy="26" r="10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W-1}" fill="none"/>
-    <path d="M46 26 L66 26" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 36" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <circle cx="36" cy="26" r="10" stroke="#111111" stroke-width="${ROAD_W-1}" fill="none"/>
+    <path d="M46 26 L66 26" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(66, 26, 'right')}
-    <circle cx="36" cy="42" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
-    <path d="M31 17 L36 14 L41 17" fill="${ARROW_COLOR}"/>
+    <circle cx="36" cy="42" r="4" fill="#D96A27" opacity="0.9"/>
+    <path d="M31 17 L36 14 L41 17" fill="#D96A27"/>
   `);
 }
 function buildRoundaboutLeft() {
   return makeSVG(`
-    <path d="M39 52 L39 36" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
-    <circle cx="36" cy="26" r="10" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W-1}" fill="none"/>
-    <path d="M26 26 L6 26" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M39 52 L39 36" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <circle cx="36" cy="26" r="10" stroke="#111111" stroke-width="${ROAD_W-1}" fill="none"/>
+    <path d="M26 26 L6 26" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(6, 26, 'left')}
-    <circle cx="36" cy="42" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
-    <path d="M31 17 L36 14 L41 17" fill="${ARROW_COLOR}"/>
+    <circle cx="36" cy="42" r="4" fill="#D96A27" opacity="0.9"/>
+    <path d="M31 17 L36 14 L41 17" fill="#D96A27"/>
   `);
 }
 function buildCrossRight() {
   return makeSVG(`
-    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
-    <path d="M6 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
-    <path d="M33 52 L33 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M6 28 L66 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M33 52 L33 28 L66 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(66, 28, 'right')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildCrossLeft() {
   return makeSVG(`
-    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
-    <path d="M6 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
-    <path d="M39 52 L39 28 L6 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M6 28 L66 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M39 52 L39 28 L6 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(6, 28, 'left')}
-    <circle cx="36" cy="38" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="38" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildCrossStraight() {
   return makeSVG(`
-    <path d="M6 28 L66 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none" opacity="0.3"/>
-    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M6 28 L66 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none" opacity="0.3"/>
+    <path d="M33 52 L33 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(36, 4, 'up')}
-    <circle cx="36" cy="42" r="4" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="42" r="4" fill="#D96A27" opacity="0.9"/>
   `);
 }
 function buildWaypoint() {
   return makeSVG(`
-    <path d="M33 52 L33 8" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 8" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(36, 4, 'up')}
-    <circle cx="36" cy="28" r="8" fill="${ARROW_COLOR}" opacity="0.9"/>
+    <circle cx="36" cy="28" r="8" fill="#D96A27" opacity="0.9"/>
     <circle cx="36" cy="28" r="4" fill="white"/>
   `);
 }
 function buildStart() {
   return makeSVG(`
-    <path d="M33 52 L33 18" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 52 L33 18" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     ${arrowHead(36, 14, 'up')}
     <rect x="22" y="6" width="28" height="14" rx="3" fill="#27ae60"/>
     <text x="36" y="17" font-family="sans-serif" font-size="9" font-weight="700" fill="white" text-anchor="middle">START</text>
@@ -1079,10 +1079,10 @@ function buildStart() {
 }
 function buildFinish() {
   return makeSVG(`
-    <path d="M33 8 L33 28" stroke="${ROAD_COLOR}" stroke-width="${ROAD_W}" stroke-linecap="round" fill="none"/>
+    <path d="M33 8 L33 28" stroke="#111111" stroke-width="7" stroke-linecap="round" fill="none"/>
     <rect x="22" y="34" width="28" height="14" rx="3" fill="#c0392b"/>
     <text x="36" y="45" font-family="sans-serif" font-size="9" font-weight="700" fill="white" text-anchor="middle">FINISH</text>
-    <circle cx="36" cy="28" r="5" fill="${ROAD_COLOR}"/>
+    <circle cx="36" cy="28" r="5" fill="#111111"/>
   `);
 }
 
