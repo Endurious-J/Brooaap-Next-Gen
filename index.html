@@ -392,10 +392,12 @@ body {
   justify-content: center;
   cursor: pointer;
   border-radius: 4px;
-  border: 1.5px solid transparent;
+  border: 1.5px solid var(--beige);
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.10);
   transition: border-color 0.15s;
 }
-.tulip-svg-wrap:hover { border-color: var(--orange); }
+.tulip-svg-wrap:hover { border-color: var(--orange); box-shadow: 0 2px 8px rgba(217,106,39,0.2); }
 
 .tulip-svg-wrap svg {
   width: 72px;
@@ -908,8 +910,8 @@ var TULIP_DEFS = [
 
 /* SVG builder helpers */
 function makeSVG(content) { return `<svg viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg">${content}</svg>`; }
-var ROAD_W = 6;
-var ROAD_COLOR = '#1A1A1A'; // path color
+var ROAD_W = 7;
+var ROAD_COLOR = '#111111'; // path color
 var ARROW_COLOR = '#D96A27'; // arrow color
 
 function arrowHead(x, y, dir) {
